@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.postgre.choongsam.mapper.Atr">
+	<insert id="trRegisterCourse" parameterType="Lecture"
+		useGeneratedKeys="true" keyColumn="LCTR_ID" keyProperty="lctr_id">
+		INSERT INTO
+		"LECTURE" ("LCTR_ID", "USER_SEQ", "ONOFF","LCTR_CATEGORY","LCTR_NAME",
+		"LCTR_COUNT","RCRT_DATE", "LCTR_COST", "LCTR_STATE", "EVAL_CRITERIA",
+		"LCTR_START_DATE", "LCTR_CNTSCHD", "FILE_GROUP", "LCTR_SCHD")
+		values (NEXTVAL('lctr_id_seq'), #{user_seq},CAST (#{onoff} AS INTEGER),CAST (#{lctr_category} AS INTEGER),#{lctr_name},#{lctr_count},#{rcrt_date},#{lctr_cost},'4001',#{eval_criteria},#{lctr_start_date},#{lctr_cntschd},#{file_group},#{lctr_schd})
+	</insert>
+	<insert id="trRegisterSyllabus">
+		INSERT INTO "SYLLABUS"
+		("LCTR_NO", "LCTR_ID", "LCTR_OTLN")
+		values (#{lctr_no},#{parameter},#{courseDetail})
+	</insert>
+	<select id="trGetAllLectureList" resultType="Lecture">
+		SELECT
+			l."LCTR_ID",
+			user_info_name."USER_SEQ",
+			user_info_name."USER_NAME" AS "user_name",
+			comm_onoff."CD_NM" AS "onoff_tr",
+			comm_category."CD_NM" AS "lctr_category",
+			l."LCTR_NAME",
+			l."LCTR_COUNT",
+			l."RCRT_DATE",
+			l."LCTR_COST",
+			comm_state."CD_NM" AS "lctr_state",
+			l."EVAL_CRITERIA",
+			l."LCTR_START_DATE",
+			l."LCTR_CNTSCHD",
+			l."FILE_GROUP",
+			l."LCTR_SCHD"
+		FROM
+			"LECTURE" l
+		LEFT JOIN
+			"COMM" comm_onoff ON l."ONOFF" = comm_onoff."CD"
+		LEFT JOIN
+			"COMM" comm_category ON l."LCTR_CATEGORY" = comm_category."CD"
+		LEFT JOIN
+			"COMM" comm_state ON l."LCTR_STATE" = comm_state."CD"
+		LEFT JOIN
+			"USER_INFO" user_info_name ON l."USER_SEQ" = user_info_name."USER_SEQ";
+	</select>
+	<select id="trGetRecruitLectureList" resultType="Lecture">
+		SELECT
+			l."LCTR_ID",
+			user_info_name."USER_NAME" AS "user_name", 
+			comm_onoff."CD_NM" AS "onoff_tr",
+			comm_category."CD_NM" AS "lctr_category",
+			l."LCTR_NAME",
+			l."LCTR_COUNT",
+			l."RCRT_DATE",
+			l."LCTR_COST",
+			comm_state."CD_NM" AS "lctr_state",
+			l."EVAL_CRITERIA",
+			l."LCTR_START_DATE",
+			l."LCTR_CNTSCHD",
+			l."FILE_GROUP",
+			l."LCTR_SCHD",
+			l."REGISTER_COUNT" 
+		FROM
+			"LECTURE" l
+		LEFT JOIN
+			"COMM" comm_onoff ON l."ONOFF" = comm_onoff."CD"
+		LEFT JOIN
+			"COMM" comm_category ON l."LCTR_CATEGORY" = comm_category."CD"
+		LEFT JOIN
+			"COMM" comm_state ON l."LCTR_STATE" = comm_state."CD"
+		LEFT JOIN
+			"USER_INFO" user_info_name ON l."USER_SEQ" = user_info_name."USER_SEQ"
+		WHERE l."LCTR_STATE" = '4003';
+	</select>
+	<select id="trGetLectureDetail" resultType="Lecture">
+		SELECT
+			l."LCTR_ID",
+			user_info_name."USER_NAME" AS "user_name", 
+			comm_onoff."CD_NM" AS "onoff_tr",
+			comm_category."CD_NM" AS "lctr_category",
+			l."LCTR_NAME",
+			l."LCTR_COUNT",
+			l."RCRT_DATE",
+			l."LCTR_COST",
+			comm_state."CD_NM" AS "lctr_state",
+			l."EVAL_CRITERIA",
+			l."LCTR_START_DATE",
+			l."LCTR_CNTSCHD",
+			l."FILE_GROUP",
+			l."LCTR_SCHD"
+		FROM
+			"LECTURE" l
+		LEFT JOIN
+			"COMM" comm_onoff ON l."ONOFF" = comm_onoff."CD"
+		LEFT JOIN
+			"COMM" comm_category ON l."LCTR_CATEGORY" = comm_category."CD"
+		LEFT JOIN
+			"COMM" comm_state ON l."LCTR_STATE" = comm_state."CD"
+		LEFT JOIN
+			"USER_INFO" user_info_name ON l."USER_SEQ" = user_info_name."USER_SEQ" 
+		WHERE l."LCTR_ID" = #{lctr_id}
+		;
+	</select>
+	
+	<select  id="trOverlapCheck"  resultType="int">
+	SELECT count(*) FROM "TIMETABLE" WHERE "LCTR_ROOM" = #{lctr_room} and "LCTR_HR" = #{schd}	
+	</select>
+	
+	
+	<insert id="trAddClassRoom">
+	INSERT INTO "TIMETABLE" ("LCTR_ID","LCTR_ROOM","LCTR_HR") VALUES (#{lctr_id},#{lctr_room},#{schd})
+	</insert>
+	<select  id="trGetAllClassRoom"  resultType="Classroom">
+	SELECT * FROM "CLASSROOM"
+	</select>
+	<select  id="trGetSyllabus"  resultType="Syllabus">
+	SELECT * FROM "SYLLABUS" WHERE "LCTR_ID" = #{lctr_id}
+	</select>
+	<update id="trApproveCourse">
+	UPDATE "LECTURE"
+	SET "LCTR_STATE" = '4002' 
+	WHERE "LCTR_ID" = #{parameter}
+	</update>
+	<update id="trRaiseRegisterCount">
+	UPDATE "LECTURE" 
+	SET "REGISTER_COUNT" = "REGISTER_COUNT"+1 
+	WHERE #{lctr_id} = "LCTR_ID"
+	</update>
+	<insert id="trApplyCourse">
+		INSERT INTO "COURSE_REGISTRATION" ("LCTR_ID","USER_SEQ","APLY_DATE","REG_STATE","PAY_STATE")
+		 VALUES (#{lctr_id},#{student_id},TO_CHAR( NOW(), 'YYYY-MM-DD'),'2001','N')
+	</insert>
+	<update id="trChangeLectureState">
+	UPDATE "LECTURE" 
+	SET "LCTR_STATE" = #{lctr_state} 
+	WHERE "LCTR_ID" = #{lctr_id}
+	</update>
+	
+</mapper>

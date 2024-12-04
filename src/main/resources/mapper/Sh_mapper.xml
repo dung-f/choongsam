@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.postgre.choongsam.mapper.Sh_mapper">
+	
+	<select id="getStartDay" parameterType="String" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT 
+		    l."LCTR_START_DATE",
+		    lv."CONTS_ID",
+		    l."LCTR_CNTSCHD",
+			lv."VIEWING_PERIOD",
+		    CASE 
+				WHEN lv."LCTR_NO" = 1 THEN l."LCTR_START_DATE"
+				WHEN lv."LCTR_NO" IS NULL THEN l."LCTR_START_DATE"
+				ELSE lv_prev."VIEWING_PERIOD"
+			END AS "befor_period",
+		    CASE
+		        WHEN s."LCTR_NO" IS NULL THEN '1' 
+		        ELSE s."LCTR_NO"+1
+		    END AS "LCTR_NO", 
+		    l."LCTR_ID" 
+		FROM (
+				SELECT *
+				FROM "SYLLABUS"
+				WHERE "LCTR_NO" > 0
+			   ) s
+		JOIN "LECTURE" l ON s."LCTR_ID" = l."LCTR_ID"
+		LEFT JOIN "LECTURE_VIDEO" lv ON s."CONTS_ID" = lv."CONTS_ID"
+		LEFT JOIN "LECTURE_VIDEO" lv_prev 
+				ON lv."LCTR_NO" = lv_prev."LCTR_NO" + 1 AND lv."LCTR_ID" = lv_prev."LCTR_ID"
+		WHERE l."LCTR_ID" = #{lctr_id}
+		AND s."CONTS_ID" IS NOT NULL
+		ORDER BY s."LCTR_NO" DESC
+		LIMIT 1
+	</select>
+	
+	<select id="getStartDay1"  parameterType="String" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT 
+		    l."LCTR_START_DATE",
+		    lv."CONTS_ID",
+		    l."LCTR_CNTSCHD",
+		    CASE 
+				WHEN lv."LCTR_NO" = 1 THEN l."LCTR_START_DATE"
+				WHEN lv."LCTR_NO" IS NULL THEN l."LCTR_START_DATE"
+				ELSE lv_prev."VIEWING_PERIOD"
+			END AS "VIEWING_PERIOD",
+		    CASE
+		        WHEN s."LCTR_NO" IS NULL THEN '1'
+		        ELSE s."LCTR_NO"
+		    END AS "LCTR_NO",
+		    l."LCTR_ID"
+		FROM (
+				SELECT *
+				FROM "SYLLABUS"
+				WHERE "LCTR_NO" > 0
+			   ) s
+		JOIN "LECTURE" l ON s."LCTR_ID" = l."LCTR_ID"
+		LEFT JOIN "LECTURE_VIDEO" lv ON s."CONTS_ID" = lv."CONTS_ID"
+		LEFT JOIN "LECTURE_VIDEO" lv_prev 
+				ON lv."LCTR_NO" = lv_prev."LCTR_NO" + 1 AND lv."LCTR_ID" = lv_prev."LCTR_ID"
+		WHERE l."LCTR_ID" = #{lctr_id}
+		AND s."CONTS_ID" IS NULL
+		ORDER BY s."LCTR_NO"
+		LIMIT 1
+	</select>
+	
+	
+	<insert id="contsFileUpload" parameterType="map">
+		INSERT INTO "FILE_GROUP" ("FILE_GROUP", "FILE_SEQ", "FILE_NM", "FILE_EXTN_NM", "FILE_SZ", "FILE_PATH_NM" , "IDNTF_NO")
+			VALUES (nextval('file_group_seq'),	1, #{fileName}, #{fileSuffix}, #{file_sz}, #{file_path}, #{idntf_no})
+	</insert>
+	
+	<insert id="fileLectureVideoUpload" parameterType="map">
+	    INSERT INTO "LECTURE_VIDEO"("CONTS_ID", "VDO_FILE_NM", "VDO_URL_ADDR", "VIEWING_PERIOD", "VDO_LENGTH", "LCTR_NO", "FILE_GROUP","LCTR_ID")
+	    	VALUES (nextval('conts_id_seq'),  #{title}, #{conts_url}, #{viewing_period}, #{vdo_length}, #{lctr_no}, currval('file_group_seq'), #{lctr_id})
+	</insert>
+	
+	<insert id="lectureVideoUpload" parameterType="map">
+	    INSERT INTO "LECTURE_VIDEO"("CONTS_ID", "VDO_FILE_NM", "VDO_URL_ADDR", "VIEWING_PERIOD", "VDO_LENGTH", "LCTR_NO", "FILE_GROUP","LCTR_ID")
+	    	VALUES (nextval('conts_id_seq'),  #{title}, #{conts_url}, #{viewing_period}, #{vdo_length}, #{lctr_no}, 0,#{lctr_id})
+	</insert>
+	
+	<update id="syllabusUpload" parameterType="map">
+		UPDATE "SYLLABUS"
+		SET "CONTS_ID" = currval('conts_id_seq')
+		WHERE "LCTR_NO" = #{lctr_no}
+				AND "LCTR_ID" = #{lctr_id}
+	</update>
+	
+	<insert id="chpTimeUpload" parameterType="map">
+		INSERT INTO "CLASS_BOOKMARK"("CONTS_ID", "CONTS_CHPTIME", "CONTS_CHPTTL", "CHP_SN")
+				VALUES (currval('conts_id_seq'),  #{chp_time}, #{cap_ttl}, #{value})
+	</insert>
+	
+	<select id="studentLecture" parameterType="map" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT DISTINCT ON (lv."LCTR_NO")
+		    c.*,
+		    u.*,
+		    l.*,
+		    s.*,
+		    lv.*,
+		    cs."CONTS_ID",
+		    cs."LCTR_ID",
+		    cs."LCTR_NO",
+		    cs."USER_SEQ",
+			cs."CONTS_MAX",
+		    TO_CHAR(lv."VIEWING_PERIOD"::DATE - INTERVAL '7 days', 'YYYY-MM-DD') AS "befor_period",
+		    CASE 
+		        WHEN TO_DATE(lv."VIEWING_PERIOD", 'YYYY-MM-DD') &lt; CURRENT_DATE THEN 
+		            CASE 
+		                WHEN cs."CONTS_PRGRT" >= 95 THEN '출석'
+		                ELSE '결석'
+		            END
+		        WHEN TO_DATE(lv."VIEWING_PERIOD", 'YYYY-MM-DD') > CURRENT_DATE THEN 
+		            CASE 
+		                WHEN cs."CONTS_PRGRT" >= 95 THEN '출석'
+		                ELSE '미수강'
+		            END
+		        ELSE '결석'
+		    END AS "VIEW_STATUS"
+		FROM "COURSE_REGISTRATION" c
+		JOIN "USER_INFO" u ON c."USER_SEQ" = u."USER_SEQ"
+		JOIN "LECTURE" l ON c."LCTR_ID" = l."LCTR_ID"
+		JOIN (
+		    SELECT * FROM "SYLLABUS" 
+		    WHERE "LCTR_NO" > 0
+		) s ON l."LCTR_ID" = s."LCTR_ID"
+		LEFT JOIN (
+					SELECT * 
+					FROM "CLASS_SCHEDULE" 
+					WHERE "USER_SEQ" = #{user_seq}
+		  			AND "LCTR_ID" = #{lctr_id}
+					) 
+		cs ON s."LCTR_NO" = cs."LCTR_NO" AND cs."USER_SEQ" = #{user_seq}
+		LEFT JOIN "LECTURE_VIDEO" lv ON s."CONTS_ID" = lv."CONTS_ID"
+		WHERE c."USER_SEQ" = #{user_seq}
+		  AND l."LCTR_ID" = #{lctr_id}
+		  AND lv."CONTS_ID" IS NOT NULL
+		ORDER BY lv."LCTR_NO", c."USER_SEQ";
+	</select>
+	
+	<select id="searchSche" parameterType="map" resultType="int">
+		SELECT * 
+		FROM "CLASS_SCHEDULE"
+		WHERE 
+			"USER_SEQ"=#{user_seq}::integer
+			AND "CONTS_ID"=#{conts_id}
+			AND "LCTR_NO"=#{lctr_no}::integer
+	</select>
+	
+	<insert id="insertSche" parameterType="map">
+		INSERT INTO "CLASS_SCHEDULE" 
+			("LCTR_NO", "LCTR_ID", "CONTS_ID", "USER_SEQ", "CONTS_FINAL", "CONTS_MAX", "CONTS_PRGRT")
+			VALUES (#{lctr_no}, #{lctr_id}, #{conts_id}, #{user_seq}, 0, 0, 0);
+	</insert>
+	
+	<select id="searchTeachConts" parameterType="map" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT DISTINCT ON (lv."LCTR_NO")
+		    u.*,
+		    l.*,
+		    s.*,
+		    lv.*,
+		    TO_CHAR(lv."VIEWING_PERIOD"::DATE - INTERVAL '7 days', 'YYYY-MM-DD') AS "befor_period"
+		FROM "USER_INFO" u
+		JOIN "LECTURE" l
+		    ON u."USER_SEQ" = l."USER_SEQ"
+		JOIN "SYLLABUS" s
+		    ON s."LCTR_ID" = l."LCTR_ID"
+		JOIN "LECTURE_VIDEO" lv
+		    ON s."CONTS_ID" = lv."CONTS_ID"
+		WHERE l."LCTR_ID" = #{lctr_id}
+		    AND u."USER_SEQ" = #{user_seq}
+
+	</select>
+	
+	<select id="LectureName" parameterType="String" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT u."USER_NAME", l."LCTR_NAME"
+		FROM "USER_INFO" u
+		JOIN "LECTURE" l ON u."USER_SEQ" = l."USER_SEQ"
+		WHERE l."LCTR_ID" = #{lctr_id}
+	</select>
+	
+	<select id="classSchedule" parameterType="map" resultType="com.postgre.choongsam.dto.Class_Schedule">
+		SELECT *
+		FROM "CLASS_SCHEDULE"
+		WHERE "LCTR_ID" = #{lctr_id}
+		AND "USER_SEQ" = #{user_seq}
+	</select>
+	
+	<select id="getcontsInfo" parameterType="string" resultType="com.postgre.choongsam.dto.Class_ScheduleAddVideo">
+		SELECT DISTINCT ON (lv."LCTR_NO")
+		    u."USER_NAME",
+		    l.*,
+		    s.*,
+		    lv.*,
+			f.*,
+		    TO_CHAR(lv."VIEWING_PERIOD"::DATE - INTERVAL '7 days', 'YYYY-MM-DD') AS "befor_period"
+		FROM "USER_INFO" u
+		JOIN "LECTURE" l
+			ON u."USER_SEQ" = l."USER_SEQ"
+		JOIN "SYLLABUS" s
+			ON s."LCTR_ID" = l."LCTR_ID"
+		JOIN "LECTURE_VIDEO" lv
+			ON s."CONTS_ID" = lv."CONTS_ID"
+		LEFT JOIN "FILE_GROUP" f 
+			ON lv."FILE_GROUP" = f."FILE_GROUP"
+		WHERE s."CONTS_ID" = #{conts_id}
+	</select>
+	
+	<select id="getcontsChp" parameterType="String" resultType="com.postgre.choongsam.dto.Class_Bookmark">
+		SELECT *
+		FROM "CLASS_BOOKMARK"
+		WHERE "CONTS_ID" = #{conts_id}
+		ORDER BY "CONTS_CHPTIME"
+	</select>
+	
+	<update id="fileLectureVideoUpdate" parameterType="map">
+	    UPDATE "LECTURE_VIDEO"
+	    SET "VDO_FILE_NM" = #{title},
+	        "VDO_URL_ADDR" = #{conts_url},
+	        "VDO_LENGTH" = #{vdo_length},
+	        "FILE_GROUP" = currval('file_group_seq'),
+	        "LCTR_ID" = #{lctr_id}
+	    WHERE "CONTS_ID" = #{conts_id}
+</update>
+	
+	<update id="lectureVideoUpdate" parameterType="map">
+	    UPDATE "LECTURE_VIDEO"
+	    SET 
+	        "VDO_FILE_NM" = #{title},
+	        "VDO_URL_ADDR" = #{conts_url},
+	        "VIEWING_PERIOD" = #{viewing_period},
+	        "VDO_LENGTH" = #{vdo_length},
+	        "LCTR_NO" = #{lctr_no},
+	        "FILE_GROUP" = 0,
+	        "LCTR_ID" = #{lctr_id}
+	    WHERE "CONTS_ID" = #{conts_id};
+	</update>
+	
+	<update id="syllabusUpdate" parameterType="map">
+		UPDATE "SYLLABUS"
+		SET "CONTS_ID" = #{conts_id}
+		WHERE "LCTR_NO" = #{lctr_no}
+				AND "LCTR_ID" = #{lctr_id}
+	</update>
+
+	<update id="chpTimeUpdate" parameterType="map">
+	    UPDATE "CLASS_BOOKMARK"
+	    SET 
+	        "CONTS_CHPTIME" = #{chp_time},
+	        "CONTS_CHPTTL" = #{cap_ttl}
+	    WHERE "CONTS_ID" = #{conts_id}
+	    AND "CHP_SN" = #{value}
+	</update>
+
+
+	
+	
+</mapper>

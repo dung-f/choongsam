@@ -1,0 +1,113 @@
+@charset "UTF-8";
+
+    /* Body Styling */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Header__ Styling */
+    .header__ {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 1920px;
+        background-color: #00664F;
+        height: 70px;
+        font-size: 20px;
+        color: white;
+        z-index: 3;
+    }
+    
+    .header__color {
+        width: 100%;
+    }
+    
+    .header__nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 50px;
+        font-weight: bold;
+        height: inherit;
+    }
+
+    .header__navBar a {
+        text-decoration: none;
+        color: white;
+        width: 100px;
+        margin: 0 125px;
+    }
+    
+    .header_login a, .header_join a, .header_logout a {
+        text-decoration: none;
+        color: white;
+    }
+    
+    .header__logo {
+        display: flex;
+        align-items: center;
+    }
+    
+    #logo {
+        height: 50px;
+    }
+    
+    /* Navigation Styling */
+    nav {
+        position: fixed;
+        width: 320px;
+        top: 70px; /* header__ 아래에 위치하도록 offset 설정 */
+        height: calc(100vh - 70px);
+        z-index: 1;
+        background-color: #304742;
+        color: white;
+        overflow: hidden;
+        transition: width 0.3s ease;
+        padding-top: 20px;
+    }
+
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    nav li {
+        width: 100%;
+        padding: 15px;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.2s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+
+    nav li:hover {
+        background-color: #00664F;
+        transform: scale(1.1);
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .submenu {
+        display: none;
+        padding-left: 25px;
+        border-left: 2px solid #236147;
+        color: white;
+        margin-top: 5px;
+    }
+
+    .submenu li {
+        font-size: 13px;
+        padding: 10px 0;
+        cursor: pointer;
+    }
+
+    /* Header under Navigation Styling */
+    header {
+        margin-left: 320px;
+        background-color: #236147;
+        color: white;
+        padding: 10px;
+        text-align: center;
+    }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.postgre.choongsam.mapper.ljm">
+	<select id="login" parameterType="Login_Info" resultType="Login_Info">
+		SELECT * 
+		FROM "LOGIN_INFO" 
+		WHERE "USER_ID" = #{user_id}
+  		AND ("USER_STATUS" = 1001 OR "USER_STATUS" = 1002);	
+  	</select>
+	
+	 <select id="getUserInfo" resultType="User_Info">
+        SELECT "USER_SEQ", "USER_ID", "DEL_STATE"
+        FROM "USER_INFO"
+        WHERE "USER_ID" = #{user_id}
+    </select>
+	
+	<select id="adminLogin" parameterType="Login_Info" resultType="Login_Info">
+		SELECT * 
+		FROM "LOGIN_INFO" 
+		WHERE "USER_ID" = #{user_id}
+		AND "USER_STATUS" = 1003		
+	</select>
+	
+	<insert id="loginSignup" parameterType="Login_Info">
+		INSERT INTO "LOGIN_INFO" ("USER_SEQ", "USER_ID", "PASSWORD", "USER_STATUS")
+		VALUES (NEXTVAL('user_seq'), #{user_id}, #{password}, #{user_status})
+	</insert>
+	
+	<insert id="userSignup" parameterType="User_Info">
+		INSERT INTO "USER_INFO" ("USER_SEQ", "USER_ID", "USER_NAME", "BIRTH", "PROFILE_NAME", "PROFILE_ADDR",
+		"ADDRESS", "EMAIL", "PHONE_NUM", "DEL_STATE", "ADDR_DETAIL")
+		VALUES (CURRVAL('user_seq'), #{user_id}, #{user_name}, #{birth}, #{profile_name}, #{profile_addr}, #{address},
+		#{email}, #{phone_num}, 0, #{addr_detail})
+	</insert>
+	
+	<select id="confirmId" resultType="int" parameterType="String"> 
+		SELECT count(*)
+		FROM "LOGIN_INFO"
+		WHERE "USER_ID" = #{user_id} 
+	</select>
+	
+	<select id="findId" parameterType="User_Info" resultType="String">
+	 	SELECT "USER_ID"
+	 	FROM "USER_INFO" 
+	 	WHERE "USER_NAME" = #{user_name} AND "EMAIL" = #{email} 
+	</select>	
+	
+	<select id="getUserName" parameterType="int" resultType="String">	
+		SELECT "USER_NAME"
+		FROM "USER_INFO"
+		WHERE "USER_SEQ" = #{user_seq}	
+	</select>
+	
+	<select id="findPw" parameterType="User_Info" resultType="User_Info">
+		SELECT * 
+		FROM "USER_INFO"
+		WHERE "USER_ID" = #{user_id} AND "EMAIL" = #{email} 
+	</select>
+	
+	<update id="updateTempPw" parameterType="Login_info">
+		UPDATE "LOGIN_INFO" 
+		SET "PASSWORD" = #{password} where "USER_ID" = #{user_id}
+	</update>
+	
+	<select id="getUserEmail" parameterType="String" resultType="String">
+		SELECT "EMAIL"
+		FROM "USER_INFO"
+		WHERE "USER_ID" = #{user_id} 
+	</select>
+	
+</mapper>

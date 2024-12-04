@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.postgre.choongsam.mapper.sjm">
+	<!-- <select id="countNotice" resultType="int"> SELECT count(*) FROM "NOTICE" 
+		</select> -->
+	<select id="countNoticeUser" resultType="int" parameterType="String">
+		SELECT
+		COUNT(*)
+		FROM "NOTICE"
+		WHERE "NTC_MTTR_YN" = 'Y'
+  AND (
+      #{keyword} IS NULL
+      OR (
+          "NTC_MTTR_TTL" ILIKE '%' || #{keyword} || '%'
+          OR "NTC_MTTR_CN" ILIKE '%' || #{keyword} || '%'
+      )
+  )
+
+	</select>
+	
+	<select id="countNoticeAll" resultType="int" parameterType="Map">
+		SELECT COUNT(*)
+		FROM "NOTICE"
+		WHERE 
+    (
+        #{keyword} IS NULL 
+        OR (
+            "NTC_MTTR_TTL" ILIKE '%' || #{keyword} || '%'  
+            OR "NTC_MTTR_CN" ILIKE '%' || #{keyword} || '%' 
+        )
+    )
+	</select>
+
+
+	<select id="selectNoticeList" resultType="Notice"
+		parameterType="Map">
+	SELECT "NTC_MTTR_SN", "USER_SEQ",
+		"NTC_MTTR_GUBUN","NTC_MTTR_TTL","NTC_MTTR_CN",
+		TO_CHAR(TO_TIMESTAMP("NTC_MTTR_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "NTC_MTTR_DT","NTC_MTTR_YN","LCTR_ID","FILE_GROUP"
+FROM "NOTICE"
+WHERE "NTC_MTTR_YN" = 'Y'
+  AND (
+      #{keyword} IS NULL
+      OR (
+          "NTC_MTTR_TTL" ILIKE '%' || #{keyword} || '%'
+          OR "NTC_MTTR_CN" ILIKE '%' || #{keyword} || '%'
+      )
+  )
+ORDER BY "NTC_MTTR_DT" DESC
+LIMIT #{rowPage}
+OFFSET #{start};
+	</select>
+	
+	<select id="selectNoticeListAll" resultType="Notice"
+		parameterType="Map">
+	SELECT "NTC_MTTR_SN", "USER_SEQ",
+		"NTC_MTTR_GUBUN","NTC_MTTR_TTL","NTC_MTTR_CN",
+		TO_CHAR(TO_TIMESTAMP("NTC_MTTR_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "NTC_MTTR_DT","NTC_MTTR_YN","LCTR_ID","FILE_GROUP"
+FROM "NOTICE"
+<where>
+        <if test="keyword != null and keyword != ''">
+            AND ("NTC_MTTR_TTL" ILIKE '%' || #{keyword} || '%'
+                 OR "NTC_MTTR_CN" ILIKE '%' || #{keyword} || '%')
+        </if>
+    </where>
+ORDER BY "NTC_MTTR_DT" DESC
+LIMIT #{rowPage}
+OFFSET #{start};
+	</select>
+
+
+	<select id="noticeDetail" parameterType="Int"
+		resultType="Notice">
+		select *
+		FROM "NOTICE"
+		WHERE "NTC_MTTR_SN" = #{ntc_mttr_sn}
+
+	</select>
+
+
+	<insert id="noticeCreate" parameterType="Notice">
+
+		INSERT INTO "NOTICE"
+		("NTC_MTTR_SN", "USER_SEQ",
+		"NTC_MTTR_GUBUN","NTC_MTTR_TTL","NTC_MTTR_CN",
+		"NTC_MTTR_DT","NTC_MTTR_YN","LCTR_ID","FILE_GROUP")
+		VALUES
+		(NEXTVAL('ntc_mttr_sn_seq'),10023,6001,#{ntc_mttr_ttl},
+		#{ntc_mttr_cn},LOCALTIMESTAMP(0),'Y', #{lctr_id},#{file_group});
+
+
+
+	</insert>
+
+
+	<insert id="FileUpload" parameterType="File_Group">
+		INSERT INTO
+		"FILE_GROUP"
+		("FILE_GROUP","FILE_SEQ","IDNTF_NO","FILE_NM","FILE_EXTN_NM","FILE_SZ","FILE_PATH_NM")
+		VALUES
+		(#{file_group},#{file_seq},#{idntf_no},#{file_nm},#{file_extn_nm},#{file_sz},#{file_path_nm})
+	</insert>
+
+	<select id="getNextFileGroupId" resultType="Int">
+		SELECT
+		NEXTVAL('file_group_seq')
+	</select>
+
+
+	<!-- 특정 file_group에 대한 최대 file_seq 가져오기 -->
+	<select id="getMaxFileSeq" parameterType="int"
+		resultType="java.lang.Integer">
+		SELECT COALESCE(MAX("FILE_SEQ"), 0) 
+		FROM "FILE_GROUP" 
+		WHERE
+		"FILE_GROUP" = #{file_group}
+	</select>
+
+
+
+
+
+	<select id="getUserSeq" parameterType="Map" resultType="Int">
+		SELECT
+		"USER_SEQ"
+		FROM "LOGIN_INFO"
+		WHERE "USER_ID" = #{user_id} AND
+		"USER_STATUS" = CAST(#{user_status} AS
+		INTEGER)
+
+	</select>
+
+	<select id="getNotesReceived" parameterType="Map" resultType="Note">
+SELECT
+        n."NOTE_SN",
+        n."BFR_NOTE_SN",
+        n."SNDPTY_SEQ",
+        n."RCVR_SEQ",
+       	TO_CHAR(TO_TIMESTAMP(n."DSPTCH_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSPTCH_DT",
+		TO_CHAR(TO_TIMESTAMP(n."RCPTN_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "RCPTN_DT",
+        n."NOTE_TTL",
+        n."NOTE_CN",
+        n."SNDPTY_NOTE_YN",
+        n."RCVR_NOTE_YN",
+        u."USER_NAME" AS "sender_name",
+        r."USER_NAME" AS "receiver_name"
+    FROM
+        "NOTE" n
+    LEFT JOIN
+        "USER_INFO" u ON n."SNDPTY_SEQ" = u."USER_SEQ"
+    LEFT JOIN
+        "USER_INFO" r ON n."RCVR_SEQ" = r."USER_SEQ"
+    WHERE
+        n."RCVR_SEQ" = #{user_seq}
+        AND n."RCVR_NOTE_YN" = 'Y'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                n."NOTE_TTL" ILIKE '%' || #{keyword} || '%' 
+                OR u."USER_NAME" ILIKE '%' || #{keyword} || '%'
+                OR r."USER_NAME" ILIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    ORDER BY "DSPTCH_DT" DESC
+    LIMIT #{rowPage}
+    OFFSET #{start};
+	</select>
+
+	<select id="getNotesSend" parameterType="Map" resultType="Note">
+ SELECT
+        n."NOTE_SN",
+        n."BFR_NOTE_SN",
+        n."SNDPTY_SEQ",
+        n."RCVR_SEQ",
+        TO_CHAR(TO_TIMESTAMP(n."DSPTCH_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSPTCH_DT",
+		TO_CHAR(TO_TIMESTAMP(n."RCPTN_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "RCPTN_DT",
+        n."NOTE_TTL",
+        n."NOTE_CN",
+        n."SNDPTY_NOTE_YN",
+        n."RCVR_NOTE_YN",
+        u."USER_NAME" AS "sender_name",
+        r."USER_NAME" AS "receiver_name"
+    FROM
+        "NOTE" n
+    LEFT JOIN
+        "USER_INFO" u ON n."SNDPTY_SEQ" = u."USER_SEQ"
+    LEFT JOIN
+        "USER_INFO" r ON n."RCVR_SEQ" = r."USER_SEQ"
+    WHERE
+        n."SNDPTY_SEQ" = #{user_seq}
+       AND n."SNDPTY_NOTE_YN" = 'Y'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                n."NOTE_TTL" ILIKE '%' || #{keyword} || '%' 
+                OR u."USER_NAME" ILIKE '%' || #{keyword} || '%'
+                OR r."USER_NAME" ILIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    ORDER BY "DSPTCH_DT" DESC
+    LIMIT #{rowPage}
+    OFFSET #{start};
+	</select>
+
+	<select id="getNote" parameterType="Int" resultType="Note">
+SELECT
+    n."NOTE_SN",
+    n."BFR_NOTE_SN",
+    n."SNDPTY_SEQ",
+    n."RCVR_SEQ",
+    n."DSPTCH_DT",
+    n."RCPTN_DT",
+    n."NOTE_TTL",
+    n."NOTE_CN",
+    n."SNDPTY_NOTE_YN",
+    n."RCVR_NOTE_YN",
+    u."USER_NAME" AS "sender_name",
+    r."USER_NAME" AS "receiver_name"
+FROM
+    "NOTE" n
+LEFT JOIN
+    "USER_INFO" u ON n."SNDPTY_SEQ" = u."USER_SEQ"
+LEFT JOIN
+    "USER_INFO" r ON n."RCVR_SEQ" = r."USER_SEQ" 
+WHERE
+    n."NOTE_SN" = #{note_sn}
+	</select>
+
+	<insert id="createNote" parameterType="Note">
+
+		INSERT INTO "NOTE"
+		("NOTE_SN", "BFR_NOTE_SN", "SNDPTY_SEQ", "RCVR_SEQ",
+		"DSPTCH_DT",
+		"RCPTN_DT", "NOTE_TTL", "NOTE_CN", "SNDPTY_NOTE_YN",
+		"RCVR_NOTE_YN")
+		VALUES (NEXTVAL('note_sn_seq'), #{bfr_note_sn},
+		#{sndpty_seq},#{rcvr_seq},LOCALTIMESTAMP(0), #{rcptn_dt}, #{note_ttl},
+		#{note_cn},'Y', 'Y')
+
+
+	</insert>
+	
+	<select id="getNoteSendTotal" resultType="Int" parameterType="Map">
+SELECT
+    COUNT(*)
+FROM
+    "NOTE" n
+JOIN
+    "USER_INFO" u ON n."SNDPTY_SEQ" = u."USER_SEQ"
+WHERE
+    n."SNDPTY_SEQ" = #{user_seq}
+    AND n."SNDPTY_NOTE_YN" = 'Y'
+    <if test="keyword != null and keyword != ''">
+        AND (
+            n."NOTE_TTL" ILIKE '%' || #{keyword} || '%' 
+
+            OR u."USER_NAME" ILIKE '%' || #{keyword} || '%'
+        )
+    </if>
+	</select>
+	<select id="getNoteRcvrTotal" resultType="Int" parameterType="Map">
+SELECT
+    COUNT(*)
+FROM
+    "NOTE" n
+JOIN
+    "USER_INFO" u ON n."SNDPTY_SEQ" = u."USER_SEQ"
+WHERE
+    n."RCVR_SEQ" = #{user_seq}
+    AND n."SNDPTY_NOTE_YN" = 'Y'
+    <if test="keyword != null and keyword != ''">
+        AND (
+            n."NOTE_TTL" ILIKE '%' || #{keyword} || '%' 
+            OR u."USER_NAME" ILIKE '%' || #{keyword} || '%'
+        )
+        </if>
+	</select>
+	
+	<update id="noticeUpdate" parameterType="Notice">
+		
+	UPDATE "NOTICE"
+SET 
+    "NTC_MTTR_TTL" = #{ntc_mttr_ttl}, 
+    "NTC_MTTR_CN" = #{ntc_mttr_cn},   
+    "FILE_GROUP" = #{file_group}
+WHERE 
+    "NTC_MTTR_SN" = #{ntc_mttr_sn}
+	
+	
+	</update>
+	
+
+	<select id="getMyLectures" parameterType="int"
+		resultType="Lecture">
+		SELECT
+    CASE
+        WHEN li."USER_STATUS" = 1001 THEN cr."LCTR_ID"   
+        WHEN li."USER_STATUS" = 1002 THEN l."LCTR_ID"    
+        ELSE NULL
+    END AS "LCTR_ID",
+    CASE
+        WHEN li."USER_STATUS" = 1001 THEN lec."LCTR_NAME" 
+        WHEN li."USER_STATUS" = 1002 THEN l."LCTR_NAME"  
+        ELSE NULL
+    END AS "LCTR_NAME"
+FROM 
+    "LOGIN_INFO" li
+LEFT JOIN 
+    "COURSE_REGISTRATION" cr ON cr."USER_SEQ" = li."USER_SEQ"  
+LEFT JOIN 
+    "LECTURE" l ON li."USER_SEQ" = l."USER_SEQ"  
+LEFT JOIN
+    "LECTURE" lec ON cr."LCTR_ID" = lec."LCTR_ID"  
+WHERE 
+    li."USER_SEQ" = ${user_seq}
+
+	</select>
+	<select id="getSameLeceture" parameterType="Map"
+		resultType="Note">
+SELECT
+    '[학생] ' || u_student."USER_NAME" AS std_name,
+    u_student."USER_SEQ" AS std_seq,
+    NULL AS inst_name,
+    NULL AS inst_seq,
+    1 AS sort_order  -- 학생은 sort_order 1로 지정
+FROM
+    "LECTURE" l
+JOIN
+    "COURSE_REGISTRATION" cr ON l."LCTR_ID" = cr."LCTR_ID"
+JOIN
+    "USER_INFO" u_student ON cr."USER_SEQ" = u_student."USER_SEQ" -- 학생 정보
+WHERE
+    l."LCTR_ID" = #{lctr_id}
+    AND u_student."USER_SEQ" != #{user_seq} -- 자신 제외
+
+UNION ALL
+
+SELECT
+    NULL AS std_name,
+    NULL AS std_seq,
+    '[교수] ' || u_instructor."USER_NAME" AS inst_name,
+    u_instructor."USER_SEQ" AS inst_seq,
+    0 AS sort_order  -- 강사는 sort_order 0으로 지정
+FROM
+    "LECTURE" l
+JOIN
+    "USER_INFO" u_instructor ON l."USER_SEQ" = u_instructor."USER_SEQ" -- 강사 정보
+WHERE
+    l."LCTR_ID" = #{lctr_id}
+    AND u_instructor."USER_SEQ" != #{user_seq} -- 자신 제외
+
+ORDER BY
+    sort_order,  -- 먼저 강사(0), 그 다음 학생(1) 순으로 정렬
+    inst_name,   -- 강사 이름 순서
+    std_name;    -- 학생 이름 순서
+
+
+	</select>
+	
+	
+	<insert id="postAsk" parameterType="Ask">
+
+	INSERT INTO "ASK"
+	("DSCSN_SN", "USER_SEQ",
+	"DSCSN_TTL", "DSCSN_CN", "DSCSN_REG_DT", "DSCSN_ANS_YN")
+	VALUES
+	(NEXTVAL('dscsn_sn_seq'),#{user_seq},#{dscsn_ttl},
+	#{dscsn_cn},LOCALTIMESTAMP(0),'N')
+
+
+
+	</insert>
+	
+	<select id="getAsksMy" resultType="Ask" parameterType="Map">
+		SELECT "DSCSN_SN", "USER_SEQ", "DSCSN_TTL", "DSCSN_CN", TO_CHAR(TO_TIMESTAMP("DSCSN_REG_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSCSN_REG_DT", "DSCSN_ANS_SEQ", "DSCSN_ANS_CN", TO_CHAR(TO_TIMESTAMP("DSCSN_ANS_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSCSN_ANS_DT", "DSCSN_ANS_YN"
+		FROM "ASK"
+		WHERE "USER_SEQ" = #{user_seq}
+		
+        <if test="keyword != null and keyword != ''">
+           AND (
+                "DSCSN_TTL" ILIKE '%' || #{keyword} || '%' 
+                OR "DSCSN_CN" ILIKE '%' || #{keyword} || '%'
+            )
+        </if>
+	ORDER BY "DSCSN_REG_DT" desc
+	 LIMIT #{rowPage}
+    OFFSET #{start};
+
+	
+	</select>
+	
+	<select id="getAsk" resultType="Ask" parameterType="Int">
+	SELECT *
+	FROM "ASK"
+	WHERE "DSCSN_SN" = #{dscsn_sn}
+	</select>
+	
+	<select id="getFile" parameterType="Map" resultType="File_Group">
+	SELECT *
+	FROM "FILE_GROUP"
+	WHERE "FILE_GROUP"=#{file_group} AND "FILE_SEQ" =#{file_seq}
+	</select>
+	
+	<select id="getFilesByGroup" parameterType="Int" resultType="File_Group">
+	SELECT *
+	FROM "FILE_GROUP"
+	WHERE "FILE_GROUP"=#{file_group} 
+	</select>
+	
+	<update id="updateReceiveDate" parameterType="Int" >
+		UPDATE "NOTE"
+		SET "RCPTN_DT" = LOCALTIMESTAMP(0)
+		WHERE "NOTE_SN" = #{note_sn};
+
+	</update>
+	
+	
+	<update id="replyUpdateAsks" parameterType="Ask" >
+		UPDATE "ASK"
+		SET "DSCSN_ANS_SEQ"= #{dscsn_ans_seq} ,"DSCSN_ANS_CN"= #{dscsn_ans_cn},"DSCSN_ANS_DT" = LOCALTIMESTAMP(0),
+					"DSCSN_ANS_YN"= #{dscsn_ans_yn}
+		WHERE "DSCSN_SN" = #{dscsn_sn};
+
+	</update>
+	
+	<select id="getAsks" resultType="Ask" parameterType="Map">
+	SELECT "DSCSN_SN", "USER_SEQ", "DSCSN_TTL", "DSCSN_CN", TO_CHAR(TO_TIMESTAMP("DSCSN_REG_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSCSN_REG_DT", "DSCSN_ANS_SEQ", "DSCSN_ANS_CN", TO_CHAR(TO_TIMESTAMP("DSCSN_ANS_DT", 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS "DSCSN_ANS_DT", "DSCSN_ANS_YN"
+	FROM "ASK"
+	<where>
+        <if test="keyword != null and keyword != ''">
+            (
+                "DSCSN_TTL" ILIKE '%' || #{keyword} || '%' 
+                OR "DSCSN_CN" ILIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    </where>
+	ORDER BY "DSCSN_REG_DT" desc
+	 LIMIT #{rowPage}
+    OFFSET #{start};
+	</select>	
+	
+	<select id="countAskMy" resultType="Int" parameterType="Map">
+
+		SELECT COUNT(*)
+		FROM "ASK"
+		WHERE "USER_SEQ" = #{user_seq}
+		<if test="keyword != null and keyword != ''">
+        AND (
+            "DSCSN_TTL" ILIKE '%%' 
+            OR "DSCSN_CN" ILIKE '%%'
+        );
+		</if>
+	</select>
+
+	<select id="countAsk" resultType="Int" parameterType="Map">
+		 SELECT COUNT(*)
+    FROM "ASK" 
+    <where>
+        <if test="keyword != null and keyword != ''">
+            (
+                "DSCSN_TTL" ILIKE '%' || #{keyword} || '%' 
+                OR "DSCSN_CN" ILIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    </where>
+	</select>
+	
+	<update id="updateNoticeYn" parameterType="Notice">
+		UPDATE "NOTICE"
+		SET "NTC_MTTR_YN" = #{ntc_mttr_yn}
+		WHERE "NTC_MTTR_SN" = #{ntc_mttr_sn}
+	
+	</update>
+	
+	<update id="updateNoteRcvrDelYn" parameterType="Note">
+		UPDATE "NOTE"
+		SET "RCVR_NOTE_YN" = #{rcvr_note_yn}
+		WHERE "NOTE_SN" = #{note_sn}
+	
+	</update>
+	
+	
+	<update id="updateNoteSentDelYn" parameterType="Note">
+		UPDATE "NOTE"
+		SET "SNDPTY_NOTE_YN" = #{sndpty_note_yn}
+		WHERE "NOTE_SN" = #{note_sn}
+	
+	</update>
+	
+	
+	
+</mapper>

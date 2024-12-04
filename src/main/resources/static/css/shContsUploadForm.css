@@ -1,0 +1,150 @@
+@charset "UTF-8";
+
+        #listBody {
+            width: 1582px;
+            height: 100%;
+            background-color: #F1F1F1;
+            float: right;
+        }
+        
+        input {
+        	border: solid 2px #D9D9D9;
+        	height: 30px;
+        	width: 800px;
+        }
+
+        .form {
+		    width: 1420px;
+		    height: auto;
+		    background-color: white;
+		    margin-left: 15px;
+		    margin-right: auto; /* 오른쪽 마진 자동으로 설정 */
+		    margin-top: 10px;
+		    padding: 30px;
+		    display: flex;
+		    flex-direction: column;  /* 요소를 세로로 정렬 */
+		    align-items: center;     /* 자식 요소들 가운데 정렬 */
+		}
+		
+		#inserts {
+		    padding: 15px;
+		    text-align: center;
+		}
+
+
+        #chapter {
+            background-color: white;
+            border: 2px #00664F solid;
+            margin-bottom: 10px; /* 챕터 사이의 간격 추가 */
+            padding: 10px;
+            width: 1000px;
+        }
+        
+        .chapterTitle {
+            margin-bottom: 50px;
+        }
+
+        .video {
+            margin-top: 20px;
+            display: none; /* 처음에 비디오 div를 숨깁니다. */
+            text-align: center;
+        }
+        
+        .oneLine {
+      		display: flex;
+      		margin-bottom: 20px;
+      	}
+        
+      	.twoLine {
+      		display: flex;
+      		margin-bottom: 10px;
+      	}
+      	
+      	.text {
+      		font-size: 20px;
+      		float: left;
+      	}
+      	
+      	.tb {
+      		width: 200px;
+      	}
+      	
+      	.tbViewing {
+      		width: 150px;
+      	}
+      	
+      	
+      	.infor {
+		height: 130px;
+		background-color: white;
+		padding: 15px;
+	}
+	
+	#inforText {
+		width: 1400px;
+		text-align:center;
+	}
+	
+	#lectureName {
+		width: 1560px;
+		height: 119px;
+		text-align: center;
+		font-size: 45px;
+	}
+	
+	.teachName {
+		margin-top: 20px;
+	}
+	
+	#teachName {
+		font-size: 25px;
+		color: #A6A6A6;
+		margin-bottom: 20px;
+	}
+	
+	.chapterTime {
+		margin-top: 30px;
+	}
+	
+	#subBut {
+		width:246px;
+		height: 50px;
+		background-color: #00664F;
+		color: white;
+	    display: flex;            /* Flexbox 사용 */
+	    align-items: center;     /* 수직 중앙 정렬 */
+   		justify-content: center;  /* 수평 중앙 정렬 */
+		font-size: 25px;
+		border: none;
+		text-align: center;
+		margin-top: 50px;
+		margin: 0 auto;
+		border-radius: 8px;
+		box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); 
+	}
+	
+	#vdo_url_addr {
+		width: 650px;
+	}
+	
+	#idInput {
+		margin-left:15px;
+		height: 35px;
+		width: 135px;
+		border: none;
+		background-color: #00664F;
+		color: white;
+	}
+	
+	#fileNameText {
+		float: left;
+		margin-left: 50px;
+		font-size: 15px;
+	}
+	
+	#contsInsert {
+		height: 80px;
+		width: 150px;
+		color: white;
+		background-color: #00664F;
+	}

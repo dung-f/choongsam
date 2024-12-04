@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="jdbcTypeForNull" value="VARCHAR"/>
+	</settings>
+
+	<typeAliases>
+		<typeAlias alias="User_Info" type="com.postgre.choongsam.dto.User_Info" />
+		<typeAlias alias="Login_Info" type="com.postgre.choongsam.dto.Login_Info" />
+		<typeAlias alias="Lecture" type="com.postgre.choongsam.dto.Lecture" />
+		<typeAlias alias="Class_Schedule" type="com.postgre.choongsam.dto.Class_Schedule"/>
+		<typeAlias alias="Class_ScheduleAddVideo" type="com.postgre.choongsam.dto.Class_ScheduleAddVideo"/>
+		<typeAlias alias="Syllabus" type="com.postgre.choongsam.dto.Syllabus"/>
+		<typeAlias alias="Notice" type="com.postgre.choongsam.dto.Notice" />
+		<typeAlias alias="Note" type="com.postgre.choongsam.dto.Note" />
+		<typeAlias alias="Homework" type="com.postgre.choongsam.dto.Homework" />
+		<typeAlias alias="Lecture" type="com.postgre.choongsam.dto.Lecture" />
+		<typeAlias alias="Lecture_Video" type="com.postgre.choongsam.dto.Lecture_Video"/>
+		<typeAlias alias="File_Group" type="com.postgre.choongsam.dto.File_Group"/>
+		<typeAlias alias="Course_Registration" type="com.postgre.choongsam.dto.Course_Registration"/>
+		<typeAlias alias="Homework_Submission" type="com.postgre.choongsam.dto.Homework_Submission"/>
+		<typeAlias alias="Class_Bookmark" type="com.postgre.choongsam.dto.Class_Bookmark"/>
+		<typeAlias alias="Ask" type="com.postgre.choongsam.dto.Ask"/>
+		<typeAlias alias="Attendance_Check" type="com.postgre.choongsam.dto.Attendance_Check"/>
+		<typeAlias alias="Classroom" type="com.postgre.choongsam.dto.Classroom"/>
+		<typeAlias alias="Grade" type="com.postgre.choongsam.dto.Grade"/>
+
+	</typeAliases>
+</configuration>

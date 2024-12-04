@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.postgre.choongsam.mapper.HMS">
+
+	<select id="findAllVideo" resultType="Lecture_Video">
+		SELECT * 
+		FROM "LECTURE_VIDEO" 
+		WHERE "CONTS_ID" IN ('1000','1001')
+	</select>
+
+	<update id="saveWatchTime" parameterType="com.postgre.choongsam.dto.Class_Schedule">
+		UPDATE "CLASS_SCHEDULE" 
+		SET
+			"CONTS_FINAL" = #{conts_final},
+			"CONTS_MAX" = #{conts_max},
+			"CONTS_PRGRT" = #{conts_prgrt}
+		FROM "SYLLABUS" SL
+		WHERE "CLASS_SCHEDULE"."LCTR_NO" = SL."LCTR_NO"
+		AND "CLASS_SCHEDULE"."CONTS_ID" = (	SELECT "CONTS_ID"
+											FROM "LECTURE_VIDEO"
+											WHERE "VDO_URL_ADDR" = #{conts_id}
+											AND "LCTR_NO"=#{lctr_no})
+		AND "CLASS_SCHEDULE"."USER_SEQ" = #{user_seq}
+	</update>
+	
+	<update id="noMaxUpdate" parameterType="com.postgre.choongsam.dto.Class_Schedule">
+		UPDATE "CLASS_SCHEDULE" 
+		SET
+			"CONTS_FINAL" = #{conts_final},
+			"CONTS_PRGRT" = #{conts_prgrt}
+		FROM "SYLLABUS" SL
+		WHERE "CLASS_SCHEDULE"."LCTR_NO" = SL."LCTR_NO"
+		AND "CLASS_SCHEDULE"."CONTS_ID" = (	SELECT "CONTS_ID"
+											FROM "LECTURE_VIDEO"
+											WHERE "VDO_URL_ADDR" = #{conts_id}
+											AND "LCTR_NO"=#{lctr_no})
+		AND "CLASS_SCHEDULE"."USER_SEQ" = #{user_seq}
+	</update>
+	
+	<select id="findLctrInfo" parameterType="map" resultType="SYLLABUS">
+		SELECT *
+		FROM "SYLLABUS"
+		WHERE "CONTS_ID" = (SELECT "CONTS_ID"
+							FROM "LECTURE_VIDEO"
+							WHERE "VDO_URL_ADDR" = #{videoId}
+							AND "LCTR_NO"=#{lctr_no})
+	</select>
+	
+	<select id="CurrentMax" parameterType="map" resultType="int">
+		SELECT "CONTS_MAX"
+		FROM "CLASS_SCHEDULE"
+		WHERE "CONTS_ID" = (SELECT "CONTS_ID"
+							FROM "LECTURE_VIDEO"
+							WHERE "VDO_URL_ADDR" = #{videoId}
+							AND "LCTR_NO"=#{lctr_no})
+		AND "CLASS_SCHEDULE"."USER_SEQ" = #{user_seq}						
+	</select>
+	
+	<select id="finalTime" parameterType="map" resultType="int">
+		SELECT "CONTS_FINAL"
+		FROM "CLASS_SCHEDULE"
+		WHERE "CONTS_ID" = (SELECT "CONTS_ID"
+							FROM "LECTURE_VIDEO"
+							WHERE "VDO_URL_ADDR" = #{videoId}
+							AND "LCTR_NO"=#{lctr_no})
+		AND "CLASS_SCHEDULE"."USER_SEQ" = #{user_seq}
+	</select>
+	
+	<select id="FileDown" parameterType="String" resultType="String">
+		SELECT "FILE_PATH_NM"
+		FROM "FILE_GROUP"
+		WHERE "FILE_GROUP" = (
+								SELECT "FILE_GROUP"
+								FROM "LECTURE_VIDEO"
+								WHERE "CONTS_ID"= #{conts_id}
+								)
+	</select>
+	
+	<select id="getURL" parameterType="String" resultType="String">
+		SELECT "VDO_URL_ADDR"
+		FROM "LECTURE_VIDEO"
+		WHERE "CONTS_ID"=#{videoId}
+	</select>
+	
+	<select id="getBookmark" parameterType="String" resultType="Class_Bookmark">
+		SELECT *
+		FROM "CLASS_BOOKMARK"
+		WHERE "CONTS_ID"=#{conts_id}
+	</select>
+	
+	<select id="getfilename" parameterType="String" resultType="String">
+		SELECT "FILE_NM"
+		FROM "FILE_GROUP"
+		WHERE "FILE_GROUP"=(SELECT "FILE_GROUP"
+							FROM "LECTURE_VIDEO"
+							WHERE "CONTS_ID"=#{conts_id})
+	</select>
+	
+	<select id="getfilegogo" parameterType="String" resultType="File_Group">
+		SELECT *
+		FROM "FILE_GROUP"
+		WHERE "FILE_GROUP"=(SELECT "FILE_GROUP"
+							FROM "LECTURE_VIDEO"
+							WHERE "CONTS_ID"=#{conts_id})
+	
+	</select>
+
+
+</mapper>

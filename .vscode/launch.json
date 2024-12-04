@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ChoongsamApplication<choongsam>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.postgre.choongsam.ChoongsamApplication",
+            "projectName": "choongsam",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
