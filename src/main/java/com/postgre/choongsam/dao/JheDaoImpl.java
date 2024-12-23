@@ -363,20 +363,6 @@ public class JheDaoImpl implements JheDao {
 		return upStudOnAtt;
 	}
 
-//	@Override
-//	public LocalDate getViewingPeriod(String lctr_id, int lctr_no) {
-//		System.out.println("getViewingPeriod 다오");
-//		String viewingPeriod = null;
-//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-//		try {
-//			viewingPeriod =session.selectOne("getViewingPeriod", Map.of("LCTR_ID", lctr_id, "LCTR_NO", lctr_no));
-//		} catch (Exception e) {
-//			System.out.println("getViewingPeriod error: " + e.getMessage());
-//			System.out.println("다오 viewingPeriod: " + viewingPeriod);
-//		}
-//		return LocalDate.parse(viewingPeriod, formatter);
-//	}
-
 	@Override
 	public List<Lecture> studLecture(int user_seq) {
 		System.out.println("학생 강의 리스트");
@@ -548,11 +534,12 @@ public class JheDaoImpl implements JheDao {
 	}
 
 	@Override
-	public Grade getupdateGrade(Grade grade) {
+	public List<Grade> getupdateGrade(Grade grade) {
 		System.out.println("수강생 성적 수정할 정보 다오");
-		Grade updateGradeList = null;
+		List<Grade> updateGradeList = null;
 		try {
-			updateGradeList = session.selectOne("getupdateGrade", grade);
+			updateGradeList = session.selectList("getupdateGrade", grade);
+			System.out.println("dao updateGradeList: " + updateGradeList);
 		} catch (Exception e) {
 			System.out.println("getupdateGrade error: " + e.getMessage());
 			System.out.println("grade: " + grade);
@@ -565,6 +552,7 @@ public class JheDaoImpl implements JheDao {
 		System.out.println("수강생 성적 수정 다오");
 		try {
 			session.selectOne("updateGrade", grade);
+			System.out.println("수강생 성적 수정 다오 grade: " + grade);
 		} catch (Exception e) {
 			System.out.println("updateGrade error: " + e.getMessage());
 			System.out.println("grade: " + grade);

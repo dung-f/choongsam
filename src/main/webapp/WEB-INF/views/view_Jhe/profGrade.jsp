@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ include file="../headerGreen.jsp" %>
-<%-- <%@ include file="../myStudyHomeNav.jsp" %> --%>
+<%@ include file="../myStudyHomeNav.jsp" %>
 <link rel="stylesheet" type="text/css" href="/css/heStd.css">
 <!DOCTYPE html>
 <html>
@@ -18,6 +18,24 @@ table {
 .contents {
 	width: 1200px;
 	text-align: center;
+}
+.updateBtn{
+	width: 60px;
+	height: 40px;
+	border-color: #00664F;
+	background-color: white;
+	color: #00664F;
+	font-weight: bold;
+	border-radius: 5px;
+	padding: 10px;
+	margin-top: 10px;
+	margin-left: 1130px;
+	transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+.updateBtn:hover {
+	background-color: #00664F;
+	color: white;
+	transform: scale(1.1); /* 버튼 크기 살짝 키우기 */
 }
 </style>
 <title>수강생 성적 조회</title>
@@ -52,6 +70,8 @@ table {
 		</tr>
 	</c:forEach>
 </table>
+		<a href="/Jhe/updateStudGrade/${lctr_id}/${user_seq}/${onoff}"><button type="submit" class="updateBtn">수정</button></a>
+
 </div>
 </body>
 </html>

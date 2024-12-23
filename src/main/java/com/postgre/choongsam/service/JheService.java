@@ -38,9 +38,10 @@ public interface JheService {
 	List<Attendance_Check> studAtt(String lctr_id, int user_seq);
 	List<Attendance_Check> profAttDetail(String lctr_id, int lctr_no);
 	List<Grade>		profGrade(String lctr_id, int user_seq);
-	Grade			getupdateGrade(Integer userSeq, String lctr_id);
+	List<Grade>		getupdateGrade(String lctr_id);
 	void			updateGrade(Integer userSeq, String lctr_id, int atndcScr, int asmtScr, int lastScr);
 	List<Grade>		studGrade(String lctr_id, int user_seq);
 	List<Grade>		studGradeDetail(String lctr_id, int user_seq);
 	Homework		checkHomework(int asmt_no, int user_seq);
+	String			getEvalCriteria(String lctr_id);
 }

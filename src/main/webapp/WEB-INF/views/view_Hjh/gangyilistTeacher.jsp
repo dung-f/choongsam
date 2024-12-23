@@ -143,13 +143,9 @@
                     </c:choose>
                 </td>
                 <td>
-					<c:if test="${lecture.lctr_state == 4003 || lecture.lctr_state == 4004 || lecture.lctr_state == 4005}">
-						<a href="/sh_lecture_teacher?lctr_id=${lecture.lctr_id}&user_seq=${user_seq}&onoff=${lecture.onoff}">
+					<c:if test="${lecture.lctr_state == 4003 || lecture.lctr_state == 4004 || lecture.lctr_state == 4005 || lecture.lctr_state == 4007}">
+						<a href="/sh_lecture_teacher?lctr_id=${lecture.lctr_id}&user_seq=${user_seq}&onoff=${lecture.onoff}&lctr_state=${lecture.lctr_state}">
 						<img alt="교수강의실입장" src="../chFile/Homework/입장.png" class="door"></a>
-					</c:if>
-					<c:if test="${lecture.lctr_state == 4007}">
-						<a href="/Jhe/profGrade?lctr_id=${lecture.lctr_id}&user_seq=${user_seq}&onoff=${lecture.onoff}">
-						<button>학생 성적 조회</button></a>
 					</c:if>
 				</td>
             </tr>

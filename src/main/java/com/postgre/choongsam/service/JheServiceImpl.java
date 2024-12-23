@@ -588,24 +588,34 @@ public class JheServiceImpl implements JheService {
 	}
 
 	@Override
-	public Grade getupdateGrade(Integer userSeq, String lctr_id) {
+	public List<Grade> getupdateGrade(String lctr_id) {
 		System.out.println("수강생 성적 수정할 정보 찾기 서비스");
-		Grade grade = new Grade();
-		grade.setUser_seq(userSeq);
-		grade.setLctr_id(lctr_id);
-		return hed.getupdateGrade(grade);
+
+		List<Grade> updateGradeList = new ArrayList<>();
+		List<Integer> userSeqList = hed.studUserSeq(lctr_id);
+		for (Integer userSeq : userSeqList) {
+			Grade grade = new Grade();
+			grade.setLctr_id(lctr_id);
+			grade.setUser_seq(userSeq);
+			List<Grade> grades = hed.getupdateGrade(grade);
+
+			if (grades != null) {
+				updateGradeList.addAll(grades);
+			}
+		}
+		return updateGradeList;
 	}
 
 	@Override
 	public void updateGrade(Integer userSeq, String lctr_id, int atndcScr, int asmtScr, int lastScr) {
-		System.out.println("수강생 성적 수정할 정보 찾기 서비스");
+		System.out.println("수강생 성적 수정할 정보 수정 서비스");
 		Grade grade = new Grade();
 		grade.setUser_seq(userSeq);
 		grade.setLctr_id(lctr_id);
 		grade.setAtndc_scr(atndcScr);
 		grade.setAsmt_scr(asmtScr);
 		grade.setLast_scr(lastScr);
-		hed.getupdateGrade(grade);
+		hed.updateGrade(grade);
 	}
 
 	@Override
@@ -636,5 +646,11 @@ public class JheServiceImpl implements JheService {
 		homework.setUser_seq(user_seq);
 		Homework checkHomeworkList = hed.checkHomework(homework);
 		return checkHomeworkList;
+	}
+
+	@Override
+	public String getEvalCriteria(String lctr_id) {
+		String evalCriteria = hed.getEvalCriteria(lctr_id);
+		return evalCriteria;
 	}
 }

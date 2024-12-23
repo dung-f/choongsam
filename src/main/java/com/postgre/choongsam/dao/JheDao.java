@@ -51,7 +51,7 @@ public interface JheDao {
 	int				getLctrCntschd(String lctr_id);
 	int				getTotalAsmts(String lctr_id);
 	int				getLctrState(String lctr_id);
-	Grade			getupdateGrade(Grade grade);
+	List<Grade>		getupdateGrade(Grade grade);
 	List<Grade>		studGrade(Grade grade);
 	List<Grade>		studGradeDetail(Grade grade);
 	List<Integer>	getLctrNoList(String lctr_id);

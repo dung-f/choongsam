@@ -12,5 +12,6 @@ public class Grade { // 성적
 	private String	fnsh_yn;	// 수료 여부
 	private String	stud_name;	// 학생 이름
 	private String	lctr_name;	// 강의명
+	private String	lctr_state;	// 강의 상태
 	private int		onoff;		// 온/오프라인여부
 }

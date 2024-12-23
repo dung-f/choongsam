@@ -322,19 +322,18 @@
 		VALUES	(#{lctr_id}, #{user_seq}, #{atndc_scr}, #{asmt_scr}, #{last_scr}, #{fnsh_yn})
 	</insert>
 	<select id="getupdateGrade" resultType="Grade">
-		SELECT		l."LCTR_ID", l."LCTR_NAME", u."USER_NAME" AS stud_name,
-					g."USER_SEQ", g."ATNDC_SCR", g."ASMT_SCR", g."LAST_SCR"
+		SELECT		l."LCTR_ID", l."LCTR_NAME", l."ONOFF", u."USER_NAME" AS stud_name,
+					g."USER_SEQ", g."ATNDC_SCR", g."ASMT_SCR", g."LAST_SCR", g."FNSH_YN"
 		FROM		"GRADE" AS g
 		JOIN		"LECTURE" AS l ON g."LCTR_ID" = l."LCTR_ID"
 		JOIN		"USER_INFO" AS u ON g."USER_SEQ" = u."USER_SEQ"
-		WHERE		g."USER_SEQ" = #{user_seq}
-		AND			g."LCTR_ID" = #{lctr_id}
+		WHERE		g."LCTR_ID" = #{lctr_id}
+		AND			g."USER_SEQ" = #{user_seq}
 	</select>
 	<update id="updateGrade" parameterType="Grade">
 		UPDATE		"GRADE"
 		SET			"ATNDC_SCR" = #{atndc_scr}, "ASMT_SCR" = #{asmt_scr}, "LAST_SCR" = #{last_scr}
-		WHERE		"USER_SEQ" = #{user_seq}
-		AND			"LCTR_ID" = #{lctr_id}
+		WHERE		"LCTR_ID" = #{lctr_id}
 	</update>
 	<select id="studGrade" resultType="Grade">
 		SELECT		l."LCTR_ID", l."LCTR_NAME", l."ONOFF",
